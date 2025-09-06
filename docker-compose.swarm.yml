@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: expense-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: expense_tracker
+      MYSQL_USER: expense_user
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/EXPENSE_WEB_mysql_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/EXPENSE_WEB_mysql_password
+    secrets:
+      - EXPENSE_WEB_mysql_root_password
+      - EXPENSE_WEB_mysql_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: expense-zookeeper-prod
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: expense-kafka-prod
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Backend API (Production)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: expense-backend-prod
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME:-expense_user}
+      DB_DATABASE: ${DB_DATABASE:-expense_tracker}
+      PORT: ${BACKEND_PORT:-3020}
+      NODE_ENV: ${NODE_ENV:-production}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
+    secrets:
+      - EXPENSE_WEB_db_password
+      - EXPENSE_WEB_jwt_secret
+    ports:
+      - "3020:3020"
+    depends_on:
+      - mysql
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Go Task Scheduler Service (Production)
+  task-scheduler:
+    build:
+      context: ./expense-scheduler
+      dockerfile: Dockerfile
+    container_name: expense-task-scheduler-prod
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME:-expense_user}
+      DB_DATABASE: ${DB_DATABASE:-expense_tracker}
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-expense-tasks}
+      SERVER_PORT: :${SCHEDULER_PORT:-3030}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@expense-tracker.com}
+    secrets:
+      - EXPENSE_WEB_db_password
+      - EXPENSE_WEB_smtp_password
+    ports:
+      - "3030:3030"
+    depends_on:
+      - mysql
+      - kafka
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+volumes:
+  mysql_prod_data:
+
+networks:
+  expense-prod-network:
+    driver: overlay
+    attachable: true
+
+secrets:
+  EXPENSE_WEB_mysql_root_password:
+    external: true
+  EXPENSE_WEB_mysql_password:
+    external: true
+  EXPENSE_WEB_db_password:
+    external: true
+  EXPENSE_WEB_jwt_secret:
+    external: true
+  EXPENSE_WEB_smtp_password:
+    external: true

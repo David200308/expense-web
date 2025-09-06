@@ -24,23 +24,27 @@ export class SecretReader {
     const fullSecretName = `EXPENSE_WEB_${secretName}`;
     const secretPath = join(this.SECRETS_PATH, fullSecretName);
     
-    try {
-      // Try to read from Docker secret file first
-      const secretValue = readFileSync(secretPath, 'utf8').trim();
-      logger.info(`Successfully read secret from file: ${fullSecretName}`);
-      return secretValue;
-    } catch (error) {
-      // Fallback to environment variable
-      const envVar = fallbackEnvVar || this.FALLBACK_ENV_VARS[secretName as keyof typeof this.FALLBACK_ENV_VARS];
-      
-      if (envVar && process.env[envVar]) {
-        logger.warn(`Secret file not found, using environment variable: ${envVar}`);
-        return process.env[envVar]!;
-      }
-      
-      logger.error(`Failed to read secret ${fullSecretName} from file and no fallback environment variable found`);
-      throw new Error(`Secret ${fullSecretName} not found in file or environment`);
+    // First, try to read from environment variable (for non-swarm deployments)
+    const envVar = fallbackEnvVar || this.FALLBACK_ENV_VARS[secretName as keyof typeof this.FALLBACK_ENV_VARS];
+    if (envVar && process.env[envVar]) {
+      logger.info(`Using environment variable for secret: ${envVar}`);
+      return process.env[envVar]!;
     }
+    
+    // Then try to read from Docker secret file (for swarm deployments)
+    try {
+      const secretValue = readFileSync(secretPath, 'utf8').trim();
+      if (secretValue) {
+        logger.info(`Successfully read secret from file: ${fullSecretName}`);
+        return secretValue;
+      }
+    } catch (error) {
+      logger.debug(`Secret file not found: ${secretPath}`);
+    }
+    
+    // If neither works, throw an error
+    logger.error(`Secret ${fullSecretName} not found in file or environment`);
+    throw new Error(`Secret ${fullSecretName} not found in file or environment. Please ensure either the Docker secret is mounted or the environment variable ${envVar} is set.`);
   }
 
   /**
