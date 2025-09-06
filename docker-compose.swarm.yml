@@ -172,3 +172,8 @@ secrets:
     external: true
   EXPENSE_WEB_smtp_password:
     external: true
+  DOCS_USER_FILE:
+    external: true
+  DOCS_PASSWORD_FILE:
+    external: true
+
