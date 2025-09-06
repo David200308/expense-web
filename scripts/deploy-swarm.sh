@@ -65,13 +65,16 @@ create_secret() {
     
     # Check if secret already exists
     if docker secret ls --format "{{.Name}}" | grep -q "^${secret_name}$"; then
-        print_warning "Secret $secret_name already exists, removing old one..."
-        docker secret rm "$secret_name" || true
+        print_warning "Secret $secret_name already exists, updating..."
+        # Remove the old secret (this will fail if it's in use, but that's ok)
+        docker secret rm "$secret_name" 2>/dev/null || true
+        # Wait a moment for the secret to be fully removed
+        sleep 2
     fi
     
     # Create the secret
     echo "$secret_value" | docker secret create "$secret_name" -
-    print_status "Created secret: $secret_name"
+    print_status "Created/updated secret: $secret_name"
 }
 
 # Create Docker secrets for sensitive data
