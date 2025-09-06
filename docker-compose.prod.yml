@@ -9,6 +9,8 @@ services:
     environment:
       MYSQL_DATABASE: expense_tracker
       MYSQL_USER: expense_user
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/EXPENSE_WEB_mysql_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/EXPENSE_WEB_mysql_password
     secrets:
       - EXPENSE_WEB_mysql_root_password
       - EXPENSE_WEB_mysql_password
