@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ethers } from 'ethers'
+import { appKit, wagmiConfig } from '@/config/walletConnect'
+
+const queryClient = new QueryClient()
 
 interface WalletContextType {
   account: string | null
@@ -36,38 +41,9 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     try {
       setIsLoading(true)
       
-      if (!window.ethereum) {
-        throw new Error('MetaMask is not installed')
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const accounts = await provider.send('eth_requestAccounts', [])
+      // Open WalletConnect modal
+      await appKit.open()
       
-      if (accounts.length === 0) {
-        throw new Error('No accounts found')
-      }
-
-      const signer = await provider.getSigner()
-      const address = await signer.getAddress()
-
-      setProvider(provider)
-      setSigner(signer)
-      setAccount(address)
-
-      // Listen for account changes
-      window.ethereum.on('accountsChanged', (accounts: string[]) => {
-        if (accounts.length === 0) {
-          disconnectWallet()
-        } else {
-          setAccount(accounts[0])
-        }
-      })
-
-      // Listen for chain changes
-      window.ethereum.on('chainChanged', () => {
-        window.location.reload()
-      })
-
     } catch (error) {
       console.error('Failed to connect wallet:', error)
       throw error
@@ -76,10 +52,15 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     }
   }
 
-  const disconnectWallet = () => {
-    setAccount(null)
-    setProvider(null)
-    setSigner(null)
+  const disconnectWallet = async () => {
+    try {
+      await appKit.disconnect()
+      setAccount(null)
+      setProvider(null)
+      setSigner(null)
+    } catch (error) {
+      console.error('Failed to disconnect wallet:', error)
+    }
   }
 
   const signMessage = async (message: string): Promise<string> => {
@@ -93,20 +74,44 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Check if already connected
-    if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' })
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            const provider = new ethers.BrowserProvider(window.ethereum)
-            provider.getSigner().then(signer => {
-              setProvider(provider)
-              setSigner(signer)
-              setAccount(accounts[0])
-            })
-          }
-        })
-        .catch(console.error)
+    const checkConnection = async () => {
+      try {
+        const provider = appKit.getProvider('eip155')
+        if (provider) {
+          const ethersProvider = new ethers.BrowserProvider(provider as any)
+          const signer = await ethersProvider.getSigner()
+          const address = await signer.getAddress()
+          
+          setProvider(ethersProvider)
+          setSigner(signer)
+          setAccount(address)
+        }
+      } catch (error) {
+        console.error('Failed to check connection:', error)
+      }
     }
+
+    checkConnection()
+
+    // Listen for account changes
+    appKit.subscribeProviders((providers) => {
+      const provider = providers.eip155
+      if (provider) {
+        const ethersProvider = new ethers.BrowserProvider(provider as any)
+        setProvider(ethersProvider)
+        
+        ethersProvider.getSigner().then(signer => {
+          setSigner(signer)
+          signer.getAddress().then(address => {
+            setAccount(address)
+          })
+        })
+      } else {
+        setAccount(null)
+        setProvider(null)
+        setSigner(null)
+      }
+    })
   }, [])
 
   const value: WalletContextType = {
@@ -121,15 +126,12 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   }
 
   return (
-    <WalletContext.Provider value={value}>
-      {children}
-    </WalletContext.Provider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <WalletContext.Provider value={value}>
+          {children}
+        </WalletContext.Provider>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
-}
-
-// Extend Window interface for TypeScript
-declare global {
-  interface Window {
-    ethereum?: any
-  }
 }

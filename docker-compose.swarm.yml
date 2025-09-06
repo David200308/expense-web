@@ -79,11 +79,13 @@ services:
       PORT: ${BACKEND_PORT:-3020}
       NODE_ENV: ${NODE_ENV:-production}
       FRONTEND_URL: ${FRONTEND_URL:-https://expense.skyproton.com}
+      DOCS_USER_FILE: /run/secrets/docs_user
+      DOCS_PASSWORD_FILE: /run/secrets/docs_password
     secrets:
       - EXPENSE_WEB_db_password
       - EXPENSE_WEB_jwt_secret
-      - DOCS_USER_FILE
-      - DOCS_PASSWORD_FILE
+      - docs_user
+      - docs_password
     ports:
       - "3020:3020"
     depends_on:
@@ -105,6 +107,7 @@ services:
     environment:
       VITE_API_BASE_URL: ${FRONTEND_API_URL:-https://expense.api.skyproton.com/api}
       VITE_TASK_SCHEDULER_URL: ${TASK_SCHEDULER_URL:-https://scheduler.expense.skyproton.com}
+      VITE_WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
     ports:
       - "3010:80"
     depends_on:
@@ -172,8 +175,8 @@ secrets:
     external: true
   EXPENSE_WEB_smtp_password:
     external: true
-  DOCS_USER_FILE:
+  docs_user:
     external: true
-  DOCS_PASSWORD_FILE:
+  docs_password:
     external: true
 
