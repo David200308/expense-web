@@ -81,7 +81,7 @@ services:
     container_name: expense-frontend-prod
     restart: unless-stopped
     environment:
-      REACT_APP_API_URL: ${FRONTEND_API_URL:-http://localhost:3020}
+      REACT_APP_API_URL: ${FRONTEND_API_URL:-http://backend:3020}
     ports:
       - "3010:80"
     depends_on:
