@@ -43,12 +43,29 @@ func Load() *Config {
 	// Load .env file if it exists
 	godotenv.Load()
 
+	// Initialize secret reader
+	secretReader := NewSecretReader()
+
+	// Read database password from Docker secret or environment
+	dbPassword, err := secretReader.ReadDbPassword()
+	if err != nil {
+		// Fallback to environment variable
+		dbPassword = getEnv("DB_PASSWORD", "password")
+	}
+
+	// Read SMTP password from Docker secret or environment
+	smtpPassword, err := secretReader.ReadSmtpPassword()
+	if err != nil {
+		// Fallback to environment variable
+		smtpPassword = getEnv("SMTP_PASSWORD", "")
+	}
+
 	return &Config{
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnvAsInt("DB_PORT", 3306),
 			Username: getEnv("DB_USERNAME", "root"),
-			Password: getEnv("DB_PASSWORD", "password"),
+			Password: dbPassword,
 			Database: getEnv("DB_DATABASE", "expense_tracker"),
 		},
 		Kafka: KafkaConfig{
@@ -62,7 +79,7 @@ func Load() *Config {
 			SMTPHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
 			SMTPPort:     getEnvAsInt("SMTP_PORT", 587),
 			SMTPUsername: getEnv("SMTP_USERNAME", ""),
-			SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+			SMTPPassword: smtpPassword,
 			FromEmail:    getEnv("FROM_EMAIL", "noreply@expense-tracker.com"),
 		},
 	}

@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './entities/user.entity';
 import { Expense } from './entities/expense.entity';
+import { SecretReader } from './utils/secret-reader';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { Expense } from './entities/expense.entity';
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT) || 3306,
       username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || 'password',
+      password: SecretReader.readDbPassword(),
       database: process.env.DB_DATABASE || 'expense_tracker',
       entities: [User, Expense],
       synchronize: process.env.NODE_ENV !== 'production',
