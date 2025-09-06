@@ -14,7 +14,11 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3010',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3010',
+      'https://expense.skyproton.com',
+      'https://www.expense.skyproton.com'
+    ],
     credentials: true,
   });
 

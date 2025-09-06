@@ -78,7 +78,7 @@ services:
       DB_DATABASE: ${DB_DATABASE:-expense_tracker}
       PORT: ${BACKEND_PORT:-3020}
       NODE_ENV: ${NODE_ENV:-production}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
+      FRONTEND_URL: ${FRONTEND_URL:-https://expense.skyproton.com}
     secrets:
       - EXPENSE_WEB_db_password
       - EXPENSE_WEB_jwt_secret
