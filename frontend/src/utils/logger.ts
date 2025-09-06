@@ -1,10 +1,6 @@
 class Logger {
-  private logDir: string = 'logs/frontend';
-  private logFile: string;
-
   constructor() {
     this.ensureLogDir();
-    this.logFile = `${this.logDir}/${new Date().toISOString().split('T')[0].replace(/-/g, '')}.log`;
   }
 
   private ensureLogDir() {
@@ -13,9 +9,6 @@ class Logger {
   }
 
   private writeLog(level: string, message: string, ...args: any[]) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] [${level}] [FRONTEND] ${message} ${args.length ? JSON.stringify(args) : ''}`;
-    
     // Log to console
     console.log(`[${level}] ${message}`, ...args);
     

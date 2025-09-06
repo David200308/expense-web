@@ -5,7 +5,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { Pie, Doughnut } from 'react-chartjs-2'
+import { Doughnut } from 'react-chartjs-2'
 import { CategoryAnalysis } from '@/services/analysisService'
 
 ChartJS.register(ArcElement, Tooltip, Legend)

@@ -1,13 +1,11 @@
 import React from 'react'
 import { Menu, Bell, User } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
 
 interface MobileHeaderProps {
   onMenuClick: () => void
 }
 
 const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick }) => {
-  const { user } = useAuth()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-white shadow-sm border-b border-gray-200">

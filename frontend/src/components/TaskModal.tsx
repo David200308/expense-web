@@ -43,10 +43,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onSave, onCancel }) => {
     amount: task.amount,
     category: task.category,
     schedule: task.schedule,
-    is_active: task.is_active
+    is_active: task.is_active,
+    last_run: task.last_run,
+    next_run: task.next_run
   })
 
-  const [errors, setErrors] = useState<Partial<typeof formData>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({})
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const [showScheduleDropdown, setShowScheduleDropdown] = useState(false)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
@@ -73,7 +75,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onSave, onCancel }) => {
   }, [showCategoryDropdown, showScheduleDropdown])
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<typeof formData> = {}
+    const newErrors: Partial<Record<keyof typeof formData, string>> = {}
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required'
@@ -83,7 +85,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onSave, onCancel }) => {
       newErrors.description = 'Description is required'
     }
 
-    if (!formData.amount || formData.amount <= 0) {
+    if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
     }
 

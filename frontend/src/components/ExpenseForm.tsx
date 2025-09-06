@@ -17,7 +17,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, initialDa
     date: initialData?.date || new Date().toISOString().split('T')[0]
   })
 
-  const [errors, setErrors] = useState<Partial<CreateExpenseRequest>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof CreateExpenseRequest, string>>>({})
 
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -40,9 +40,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, initialDa
   }, [showCategoryDropdown])
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<CreateExpenseRequest> = {}
+    const newErrors: Partial<Record<keyof CreateExpenseRequest, string>> = {}
 
-    if (!formData.amount || formData.amount <= 0) {
+    if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
     }
 

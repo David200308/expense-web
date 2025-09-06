@@ -38,7 +38,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel }) => {
     is_active: true
   })
 
-  const [errors, setErrors] = useState<Partial<TaskFormData>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof TaskFormData, string>>>({})
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const [showScheduleDropdown, setShowScheduleDropdown] = useState(false)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
@@ -65,7 +65,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel }) => {
   }, [showCategoryDropdown, showScheduleDropdown])
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<TaskFormData> = {}
+    const newErrors: Partial<Record<keyof TaskFormData, string>> = {}
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required'
@@ -75,7 +75,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel }) => {
       newErrors.description = 'Description is required'
     }
 
-    if (!formData.amount || formData.amount <= 0) {
+    if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
     }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { DollarSign, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
+import { DollarSign, TrendingUp, Calendar } from 'lucide-react'
 import { expenseService } from '@/services/expenseService'
 import { Expense } from '@/types'
 import { useCurrency } from '@/contexts/CurrencyContext'

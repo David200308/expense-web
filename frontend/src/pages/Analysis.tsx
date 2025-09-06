@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, BarChart3, PieChart, TrendingUp, Filter, Download } from 'lucide-react'
+import { BarChart3, PieChart, TrendingUp, Filter, Download } from 'lucide-react'
 import { analysisService, AnalysisFilters, AnalysisReport } from '@/services/analysisService'
 import { useCurrency } from '@/contexts/CurrencyContext'
-import useMobile from '@/hooks/useMobile'
 import CategoryChart from '@/components/analysis/CategoryChart'
 import TimeSeriesChart from '@/components/analysis/TimeSeriesChart'
 import AnalysisSummary from '@/components/analysis/AnalysisSummary'
@@ -17,7 +16,6 @@ const Analysis: React.FC = () => {
   })
   const [showFilters, setShowFilters] = useState(false)
   const { formatAmount, isLoading: currencyLoading } = useCurrency()
-  const isMobile = useMobile()
 
   useEffect(() => {
     fetchAnalysisReport()

@@ -17,7 +17,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({ expense, onSave, onCancel }
     date: new Date(expense.date).toISOString().split('T')[0]
   })
 
-  const [errors, setErrors] = useState<Partial<typeof formData>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({})
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -39,9 +39,9 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({ expense, onSave, onCancel }
   }, [showCategoryDropdown])
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<typeof formData> = {}
+    const newErrors: Partial<Record<keyof typeof formData, string>> = {}
 
-    if (!formData.amount || formData.amount <= 0) {
+    if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
     }
 
