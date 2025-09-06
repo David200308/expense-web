@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { logger } from './utils/logger';
+import { readFileSync } from 'fs';
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -34,6 +36,20 @@ async function bootstrap() {
 
   // Global prefix
   app.setGlobalPrefix('api');
+
+  const [docsUser, docsPass] = [
+    readFileSync(process.env.DOCS_USER_FILE, 'utf8').trim(), 
+    readFileSync(process.env.DOCS_PASSWORD_FILE, 'utf8').trim()
+  ];
+  app.use(
+    ['api/docs'],
+    basicAuth({
+      challenge: true,
+      users: { 
+        [docsUser]: docsPass
+      },
+    }),
+  );
 
   // Setup Swagger
   const config = new DocumentBuilder()

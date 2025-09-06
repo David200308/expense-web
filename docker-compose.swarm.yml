@@ -82,6 +82,8 @@ services:
     secrets:
       - EXPENSE_WEB_db_password
       - EXPENSE_WEB_jwt_secret
+      - DOCS_USER_FILE
+      - DOCS_PASSWORD_FILE
     ports:
       - "3020:3020"
     depends_on:
