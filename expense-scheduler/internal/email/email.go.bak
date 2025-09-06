@@ -1,0 +1,59 @@
+package email
+
+import (
+	"expense-scheduler/internal/config"
+	"expense-scheduler/internal/models"
+	"fmt"
+	"log"
+
+	"gopkg.in/gomail.v2"
+)
+
+type EmailService struct {
+	config config.EmailConfig
+}
+
+func New(cfg config.EmailConfig) *EmailService {
+	return &EmailService{config: cfg}
+}
+
+func (e *EmailService) SendNotification(notification models.EmailNotification) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", e.config.FromEmail)
+	m.SetHeader("To", notification.To)
+	m.SetHeader("Subject", notification.Subject)
+	m.SetBody("text/html", notification.Body)
+
+	d := gomail.NewDialer(e.config.SMTPHost, e.config.SMTPPort, e.config.SMTPUsername, e.config.SMTPPassword)
+
+	if err := d.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	log.Printf("Email sent to %s for task %s", notification.To, notification.TaskID)
+	return nil
+}
+
+func (e *EmailService) SendWelcomeEmail(to, userName string) error {
+	subject := "Welcome to Expense Tracker Notifications"
+	body := fmt.Sprintf(`
+		<html>
+		<body>
+			<h2>Welcome to Expense Tracker!</h2>
+			<p>Hello %s,</p>
+			<p>You've successfully set up email notifications for your expense tracking. You'll now receive reminders for your scheduled expenses.</p>
+			<p>Thank you for using our service!</p>
+			<br>
+			<p>Best regards,<br>Expense Tracker Team</p>
+		</body>
+		</html>
+	`, userName)
+
+	notification := models.EmailNotification{
+		To:      to,
+		Subject: subject,
+		Body:    body,
+	}
+
+	return e.SendNotification(notification)
+}

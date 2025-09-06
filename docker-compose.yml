@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: expense-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: expense_tracker
+      MYSQL_USER: expense_user
+      MYSQL_PASSWORD: expense_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - expense-network
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: expense-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - expense-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: expense-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+    networks:
+      - expense-network
+
+  # NestJS Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: expense-backend
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: expense_user
+      DB_PASSWORD: expense_password
+      DB_DATABASE: expense_tracker
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      PORT: 3020
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "3020:3020"
+    networks:
+      - expense-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: expense-frontend
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_API_URL: http://localhost:3020
+    ports:
+      - "3000:3000"
+    networks:
+      - expense-network
+
+  # Go Task Scheduler Service
+  task-scheduler:
+    build:
+      context: ./expense-scheduler
+      dockerfile: Dockerfile
+    container_name: expense-task-scheduler
+    depends_on:
+      - mysql
+      - kafka
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: expense_user
+      DB_PASSWORD: expense_password
+      DB_DATABASE: expense_tracker
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: expense-tasks
+      SERVER_PORT: :8080
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      FROM_EMAIL: ${FROM_EMAIL}
+    ports:
+      - "8080:8080"
+    networks:
+      - expense-network
+
+volumes:
+  mysql_data:
+
+networks:
+  expense-network:
+    driver: bridge

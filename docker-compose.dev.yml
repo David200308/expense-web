@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: expense-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: expense_tracker
+      MYSQL_USER: expense_user
+      MYSQL_PASSWORD: expense_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    networks:
+      - expense-dev-network
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: expense-zookeeper-dev
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - expense-dev-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: expense-kafka-dev
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+    networks:
+      - expense-dev-network
+
+  # Backend API (Development)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: expense-backend-dev
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME:-expense_user}
+      DB_PASSWORD: ${DB_PASSWORD:-expense_password}
+      DB_DATABASE: ${DB_DATABASE:-expense_tracker}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      PORT: ${BACKEND_PORT:-3020}
+      NODE_ENV: ${NODE_ENV:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
+    ports:
+      - "3020:3020"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - mysql
+    networks:
+      - expense-dev-network
+    command: pnpm start:dev
+
+  # Go Task Scheduler Service (Development)
+  task-scheduler:
+    build:
+      context: ./expense-scheduler
+      dockerfile: Dockerfile
+    container_name: expense-task-scheduler-dev
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME:-expense_user}
+      DB_PASSWORD: ${DB_PASSWORD:-expense_password}
+      DB_DATABASE: ${DB_DATABASE:-expense_tracker}
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-expense-tasks}
+      SERVER_PORT: :${SCHEDULER_PORT:-3030}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@expense-tracker.com}
+    ports:
+      - "3030:3030"
+    depends_on:
+      - mysql
+      - kafka
+    networks:
+      - expense-dev-network
+
+volumes:
+  mysql_dev_data:
+
+networks:
+  expense-dev-network:
+    driver: bridge
