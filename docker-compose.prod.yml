@@ -73,6 +73,22 @@ services:
     networks:
       - expense-prod-network
 
+  # Frontend (Production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: expense-frontend-prod
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${FRONTEND_API_URL:-http://localhost:3020}
+    ports:
+      - "3010:80"
+    depends_on:
+      - backend
+    networks:
+      - expense-prod-network
+
   # Go Task Scheduler Service (Production)
   task-scheduler:
     build:

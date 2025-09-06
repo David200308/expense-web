@@ -108,6 +108,7 @@ print_status "Docker secrets created successfully!"
 print_status "Building Docker images..."
 docker build -t expense-backend:latest ./backend
 docker build -t expense-scheduler:latest ./expense-scheduler
+docker build -t expense-frontend:latest ./frontend
 print_status "Docker images built successfully!"
 
 # Deploy the stack

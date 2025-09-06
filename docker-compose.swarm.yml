@@ -95,6 +95,26 @@ services:
         delay: 5s
         max_attempts: 3
 
+  # Frontend (Production)
+  frontend:
+    image: expense-frontend:latest
+    container_name: expense-frontend-prod
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${FRONTEND_API_URL:-http://localhost:3020}
+    ports:
+      - "3010:80"
+    depends_on:
+      - backend
+    networks:
+      - expense-prod-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
   # Go Task Scheduler Service (Production)
   task-scheduler:
     image: expense-scheduler:latest
