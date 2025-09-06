@@ -39,7 +39,7 @@ const Tasks: React.FC = () => {
   const fetchTasks = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${user?.id}`)
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${user?.id}`)
       if (!response.ok) {
         throw new Error('Failed to fetch tasks')
       }
@@ -54,7 +54,7 @@ const Tasks: React.FC = () => {
 
   const handleCreateTask = async (taskData: { title: string; description: string; amount: number; category: string; schedule: string; is_active: boolean }) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks`, {
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const Tasks: React.FC = () => {
 
   const handleUpdateTask = async (taskData: Omit<Task, 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${taskData.id}`, {
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${taskData.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const Tasks: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${id}`, {
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${id}`, {
         method: 'DELETE',
       })
 
@@ -119,7 +119,7 @@ const Tasks: React.FC = () => {
 
   const handleToggleTask = async (task: Task) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${task.id}`, {
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${task.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const Tasks: React.FC = () => {
 
   const handleTriggerTask = async (id: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${id}/trigger`, {
+      const response = await fetch(`${(window as any).APP_CONFIG?.TASK_SCHEDULER_URL || import.meta.env.VITE_TASK_SCHEDULER_URL || 'http://localhost:3030'}/api/v1/tasks/${id}/trigger`, {
         method: 'POST',
       })
 
