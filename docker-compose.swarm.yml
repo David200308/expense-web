@@ -156,6 +156,7 @@ networks:
   expense-prod-network:
     driver: overlay
     attachable: true
+    external: false
 
 secrets:
   EXPENSE_WEB_mysql_root_password:
