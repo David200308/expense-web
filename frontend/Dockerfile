@@ -35,8 +35,8 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
     echo 'cat > /usr/share/nginx/html/config.js << EOF' >> /docker-entrypoint.sh && \
     echo 'window.APP_CONFIG = {' >> /docker-entrypoint.sh && \
-    echo '  API_BASE_URL: "${VITE_API_BASE_URL:-http://backend:3020/api}",' >> /docker-entrypoint.sh && \
-    echo '  TASK_SCHEDULER_URL: "${VITE_TASK_SCHEDULER_URL:-http://task-scheduler:3030}"' >> /docker-entrypoint.sh && \
+    echo '  API_BASE_URL: "${VITE_API_BASE_URL:-https://expense.api.skyproton.com/api}",' >> /docker-entrypoint.sh && \
+    echo '  TASK_SCHEDULER_URL: "${VITE_TASK_SCHEDULER_URL:-https://scheduler.expense.skyproton.com}"' >> /docker-entrypoint.sh && \
     echo '};' >> /docker-entrypoint.sh && \
     echo 'EOF' >> /docker-entrypoint.sh && \
     echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
