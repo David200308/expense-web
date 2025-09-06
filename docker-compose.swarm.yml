@@ -68,9 +68,7 @@ services:
 
   # Backend API (Production)
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: expense-backend:latest
     container_name: expense-backend-prod
     restart: unless-stopped
     environment:
@@ -99,9 +97,7 @@ services:
 
   # Go Task Scheduler Service (Production)
   task-scheduler:
-    build:
-      context: ./expense-scheduler
-      dockerfile: Dockerfile
+    image: expense-scheduler:latest
     container_name: expense-task-scheduler-prod
     restart: unless-stopped
     environment:

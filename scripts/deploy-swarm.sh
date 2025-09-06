@@ -104,6 +104,12 @@ fi
 
 print_status "Docker secrets created successfully!"
 
+# Build Docker images
+print_status "Building Docker images..."
+docker build -t expense-backend:latest ./backend
+docker build -t expense-scheduler:latest ./expense-scheduler
+print_status "Docker images built successfully!"
+
 # Deploy the stack
 print_status "Deploying stack to Docker Swarm..."
 
