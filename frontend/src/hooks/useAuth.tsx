@@ -67,12 +67,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Get nonce from backend
       const { nonce } = await authService.getNonce(account)
+      console.log('Got nonce:', nonce)
       
       // Create message to sign
       const message = `Sign this message to authenticate with Expense Tracker.\n\nNonce: ${nonce}`
       
       // Sign the message
       const signature = await signMessage(message)
+      console.log('Message signed successfully')
       
       // Send to backend for verification
       const response: AuthResponse = await authService.login({
@@ -81,10 +83,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         message
       })
       
+      console.log('Login response:', response)
+      
       // Store token and user data
       setToken(response.token)
       setUser(response.user)
       localStorage.setItem('auth_token', response.token)
+      
+      console.log('User authenticated successfully')
       
     } catch (error) {
       console.error('Login failed:', error)

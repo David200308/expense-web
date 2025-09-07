@@ -7,24 +7,33 @@ import { useAuth } from '@/hooks/useAuth'
 const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const { connectWallet, isConnected, isLoading: walletLoading } = useWallet()
-  const { login, isLoading: authLoading, isAuthenticated } = useAuth()
+  const { login, isLoading: authLoading, isAuthenticated, user, token } = useAuth()
 
   const isLoading = walletLoading || authLoading
 
+  console.log('Login component render - isAuthenticated:', isAuthenticated, 'user:', user, 'token:', token)
+
   if (isAuthenticated) {
+    console.log('Redirecting to dashboard...')
     return <Navigate to="/dashboard" replace />
   }
 
   const handleConnectAndLogin = async () => {
     try {
       setError(null)
+      console.log('Starting login process...')
       
       if (!isConnected) {
+        console.log('Connecting wallet...')
         await connectWallet()
+        console.log('Wallet connected')
       }
       
+      console.log('Starting authentication...')
       await login()
+      console.log('Authentication completed')
     } catch (err) {
+      console.error('Login error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     }
   }
