@@ -21,6 +21,30 @@ services:
     networks:
       - expense-prod-network
 
+  # Database Initialization
+  db-init:
+    image: mysql:8.0
+    container_name: expense-db-init-prod
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: expense_user
+      DB_DATABASE: expense_tracker
+      DB_PASSWORD_FILE: /run/secrets/EXPENSE_WEB_db_password
+    secrets:
+      - EXPENSE_WEB_db_password
+    volumes:
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    command: >
+      bash -c "
+        export DB_PASSWORD=\$$(cat /run/secrets/EXPENSE_WEB_db_password) &&
+        /docker-entrypoint-initdb.d/init-db.sh
+      "
+    networks:
+      - expense-prod-network
+
   # Zookeeper for Kafka
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -70,6 +94,7 @@ services:
       - "3020:3020"
     depends_on:
       - mysql
+      - db-init
     networks:
       - expense-prod-network
 
