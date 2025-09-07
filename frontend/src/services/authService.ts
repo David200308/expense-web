@@ -22,6 +22,14 @@ api.interceptors.request.use((config) => {
 export const authService = {
   async getNonce(walletAddress: string): Promise<{ nonce: string }> {
     const response = await api.get(`/auth/nonce/${walletAddress}`)
+    console.log('Nonce API response:', response.data)
+    
+    // Handle the wrapped response format
+    if (response.data.success && response.data.data) {
+      return response.data.data
+    }
+    
+    // Fallback to direct response (for backward compatibility)
     return response.data
   },
 
