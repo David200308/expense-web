@@ -86,7 +86,16 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     if (!signer) {
       throw new Error('Wallet not connected')
     }
-    return await signer.signMessage(message)
+    console.log('Signing message with signer:', signer)
+    console.log('Message to sign:', message)
+    try {
+      const signature = await signer.signMessage(message)
+      console.log('Signature received:', signature)
+      return signature
+    } catch (error) {
+      console.error('Error signing message:', error)
+      throw error
+    }
   }
 
   const isConnected = !!account

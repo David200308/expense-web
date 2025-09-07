@@ -62,6 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error('Wallet not connected')
     }
 
+    console.log('Login - isConnected:', isConnected, 'account:', account, 'signer available:', !!signMessage)
+
     try {
       setIsLoading(true)
       
@@ -73,8 +75,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const message = `Sign this message to authenticate with Expense Tracker.\n\nNonce: ${nonce}`
       
       // Sign the message
+      console.log('About to sign message:', message)
       const signature = await signMessage(message)
-      console.log('Message signed successfully')
+      console.log('Message signed successfully, signature:', signature)
       
       // Send to backend for verification
       const response: AuthResponse = await authService.login({
