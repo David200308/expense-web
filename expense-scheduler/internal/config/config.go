@@ -62,9 +62,9 @@ func Load() *Config {
 
 	return &Config{
 		Database: DatabaseConfig{
-			Host:     getEnv("DB_HOST", "localhost"),
+			Host:     getEnv("DB_HOST", "127.0.0.1"),
 			Port:     getEnvAsInt("DB_PORT", 3306),
-			Username: getEnv("DB_USERNAME", "root"),
+			Username: getEnv("DB_USERNAME", "expense_user"),
 			Password: dbPassword,
 			Database: getEnv("DB_DATABASE", "expense_tracker"),
 		},
