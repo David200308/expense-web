@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import MobileHeader from '@/components/MobileHeader'
 import MobileBottomNav from '@/components/MobileBottomNav'
@@ -7,6 +7,7 @@ import MobileSidebar from '@/components/MobileSidebar'
 
 const MobileLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (isLoading) {
@@ -15,6 +16,10 @@ const MobileLayout: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     )
+  }
+
+  if (location.pathname === '/') {
+    return null
   }
 
   if (!isAuthenticated) {

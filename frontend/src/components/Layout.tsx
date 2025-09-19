@@ -1,11 +1,12 @@
 import React from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
 
 const Layout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
 
   if (isLoading) {
     return (
@@ -13,6 +14,10 @@ const Layout: React.FC = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
       </div>
     )
+  }
+
+  if (location.pathname === '/') {
+    return null
   }
 
   if (!isAuthenticated) {

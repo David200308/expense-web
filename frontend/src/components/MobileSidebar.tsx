@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { X, Home, Receipt, Clock, BarChart3, Settings, LogOut, User } from 'lucide-react'
+import { X, Home, Receipt, Clock, BarChart3, Settings, LogOut, User, LineChart, Globe } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface MobileSidebarProps {
@@ -14,6 +14,8 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Expenses', href: '/expenses', icon: Receipt },
+    { name: 'Investments', href: '/investments', icon: LineChart },
+    { name: 'SaaS', href: '/saas', icon: Globe },
     { name: 'Tasks', href: '/tasks', icon: Clock },
     { name: 'Analysis', href: '/analysis', icon: BarChart3 },
     { name: 'Settings', href: '/settings', icon: Settings },
