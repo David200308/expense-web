@@ -15,7 +15,6 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Expenses', href: '/expenses', icon: Receipt },
     { name: 'Investments', href: '/investments', icon: LineChart },
-    { name: 'SaaS', href: '/saas', icon: Globe },
     { name: 'Tasks', href: '/tasks', icon: Clock },
     { name: 'Analysis', href: '/analysis', icon: BarChart3 },
     { name: 'Settings', href: '/settings', icon: Settings },
