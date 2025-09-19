@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Receipt, Clock, BarChart3, Settings, LineChart, Globe } from 'lucide-react'
+import { Home, Receipt, Clock, BarChart3, Settings, LineChart } from 'lucide-react'
 
 const MobileBottomNav: React.FC = () => {
   const navigation = [

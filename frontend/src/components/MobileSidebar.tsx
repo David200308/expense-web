@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { X, Home, Receipt, Clock, BarChart3, Settings, LogOut, User, LineChart, Globe } from 'lucide-react'
+import { X, Home, Receipt, Clock, BarChart3, Settings, LogOut, User, LineChart } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface MobileSidebarProps {
